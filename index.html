@@ -1,0 +1,2022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IP-SAKTI Sahayak | AI-Powered Ayurveda IP & Regulatory Assistant</title>
+  <meta name="description" content="Multilingual, RAG-based AI assistant for Intellectual Property and regulatory guidance in Ayurveda. SIH26045 – Ministry of Ayush." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & Base ────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --saffron:   #E8711A;
+      --saffron-d: #C55A0E;
+      --gold:      #D4A017;
+      --gold-l:    #F2C94C;
+      --green:     #1B7A4E;
+      --green-l:   #27AE70;
+      --green-xl:  #E8F8F1;
+      --cream:     #FDF6EC;
+      --cream-d:   #F5EBD5;
+      --ink:       #1A1A2E;
+      --ink-m:     #3D3D5C;
+      --ink-l:     #6B7280;
+      --white:     #FFFFFF;
+      --border:    #E5E7EB;
+      --card-bg:   #FFFFFF;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,.08);
+      --shadow-md: 0 4px 16px rgba(0,0,0,.10);
+      --shadow-lg: 0 16px 48px rgba(0,0,0,.12);
+      --r-sm: 8px;
+      --r-md: 14px;
+      --r-lg: 22px;
+      --r-xl: 32px;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--white);
+      color: var(--ink);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    img { display: block; max-width: 100%; }
+    a { text-decoration: none; color: inherit; }
+    ul { list-style: none; }
+
+    /* ── Utility ─────────────────────────────────────────────────── */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+    .section-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--green-xl); color: var(--green);
+      font-size: 12px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; padding: 6px 14px; border-radius: 99px;
+      margin-bottom: 16px;
+    }
+    .section-tag.saffron { background: #FEF0E3; color: var(--saffron); }
+    .section-tag.gold    { background: #FBF4DC; color: #9A7010; }
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(28px, 4vw, 48px);
+      font-weight: 800; line-height: 1.15;
+      color: var(--ink);
+    }
+    .section-sub {
+      font-size: 17px; color: var(--ink-l); max-width: 620px;
+      margin-top: 14px; line-height: 1.7;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 28px; border-radius: 99px;
+      font-size: 15px; font-weight: 600; cursor: pointer;
+      border: none; transition: all .2s;
+    }
+    .btn-primary {
+      background: var(--saffron); color: var(--white);
+    }
+    .btn-primary:hover { background: var(--saffron-d); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(232,113,26,.35); }
+    .btn-outline {
+      background: transparent; color: var(--white);
+      border: 2px solid rgba(255,255,255,.5);
+    }
+    .btn-outline:hover { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.9); }
+    .btn-green {
+      background: var(--green); color: var(--white);
+    }
+    .btn-green:hover { background: var(--green-l); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(27,122,78,.3); }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 28px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+
+    /* ── Navbar ──────────────────────────────────────────────────── */
+    #navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      transition: all .3s;
+    }
+    #navbar.scrolled {
+      background: rgba(255,255,255,.95);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow-sm);
+    }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 0;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .logo-emblem {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--saffron), var(--gold));
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+    }
+    .logo-text { line-height: 1.1; }
+    .logo-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px; font-weight: 800;
+      background: linear-gradient(135deg, var(--saffron), var(--gold));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    #navbar.scrolled .logo-title { background: linear-gradient(135deg, var(--saffron), var(--gold)); -webkit-background-clip: text; background-clip: text; }
+    .logo-sub { font-size: 10px; color: var(--ink-l); letter-spacing: .05em; }
+    #navbar:not(.scrolled) .logo-sub { color: rgba(255,255,255,.65); }
+    .nav-links {
+      display: flex; align-items: center; gap: 32px;
+    }
+    .nav-links a {
+      font-size: 14px; font-weight: 500;
+      color: rgba(255,255,255,.85);
+      transition: color .2s;
+    }
+    #navbar.scrolled .nav-links a { color: var(--ink-m); }
+    .nav-links a:hover { color: var(--white); }
+    #navbar.scrolled .nav-links a:hover { color: var(--saffron); }
+    .nav-cta {
+      background: var(--white) !important;
+      color: var(--saffron) !important;
+      padding: 10px 22px;
+      border-radius: 99px;
+      font-weight: 700 !important;
+      font-size: 13px !important;
+      transition: all .2s !important;
+      box-shadow: var(--shadow-sm);
+    }
+    #navbar.scrolled .nav-cta {
+      background: var(--saffron) !important;
+      color: var(--white) !important;
+    }
+    .hamburger { display: none; background: none; border: none; cursor: pointer; flex-direction: column; gap: 5px; }
+    .hamburger span { width: 24px; height: 2px; background: var(--white); border-radius: 2px; transition: .3s; }
+    #navbar.scrolled .hamburger span { background: var(--ink); }
+
+    /* ── Hero ────────────────────────────────────────────────────── */
+    #hero {
+      min-height: 100vh;
+      background: linear-gradient(145deg, #0D1F3C 0%, #1B3A6B 40%, #1B4D3E 100%);
+      position: relative; overflow: hidden;
+      display: flex; align-items: center;
+      padding: 120px 0 80px;
+    }
+    .hero-bg-pattern {
+      position: absolute; inset: 0; opacity: .05;
+      background-image:
+        radial-gradient(circle at 20% 20%, var(--gold) 1px, transparent 1px),
+        radial-gradient(circle at 80% 80%, var(--saffron) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    .hero-orb {
+      position: absolute; border-radius: 50%;
+      filter: blur(80px); pointer-events: none;
+    }
+    .hero-orb-1 { width: 500px; height: 500px; background: rgba(232,113,26,.18); top: -100px; right: -80px; }
+    .hero-orb-2 { width: 400px; height: 400px; background: rgba(27,122,78,.18); bottom: -100px; left: -60px; }
+    .hero-orb-3 { width: 250px; height: 250px; background: rgba(212,160,23,.12); top: 40%; left: 40%; }
+    .hero-inner {
+      position: relative; z-index: 2;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 60px;
+      align-items: center;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,.1);
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 99px; padding: 7px 16px;
+      font-size: 12px; font-weight: 600; color: var(--gold-l);
+      letter-spacing: .06em; text-transform: uppercase;
+      margin-bottom: 24px;
+      backdrop-filter: blur(8px);
+    }
+    .hero-badge .dot { width: 6px; height: 6px; background: var(--gold-l); border-radius: 50%; animation: blink 1.6s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(36px, 5vw, 64px);
+      font-weight: 800; line-height: 1.1;
+      color: var(--white);
+    }
+    .hero-title .accent {
+      background: linear-gradient(135deg, var(--saffron), var(--gold-l));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub {
+      font-size: 17px; color: rgba(255,255,255,.72);
+      margin: 20px 0 36px; line-height: 1.75; max-width: 540px;
+    }
+    .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+    .hero-stats {
+      display: flex; gap: 32px; margin-top: 48px;
+      padding-top: 36px;
+      border-top: 1px solid rgba(255,255,255,.12);
+    }
+    .hero-stat { }
+    .hero-stat-value {
+      font-size: 28px; font-weight: 800; color: var(--white);
+      font-family: 'Playfair Display', serif;
+    }
+    .hero-stat-label { font-size: 12px; color: rgba(255,255,255,.5); margin-top: 2px; letter-spacing: .04em; }
+    .hero-visual {
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .hero-card {
+      background: rgba(255,255,255,.07);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: var(--r-lg);
+      padding: 24px;
+      transition: transform .3s;
+    }
+    .hero-card:hover { transform: translateY(-4px); }
+    .hero-card-header {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+    }
+    .hero-card-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .ic-saffron { background: rgba(232,113,26,.25); }
+    .ic-green   { background: rgba(27,122,78,.25); }
+    .ic-gold    { background: rgba(212,160,23,.25); }
+    .hero-card-title { font-size: 14px; font-weight: 700; color: var(--white); }
+    .hero-card-sub   { font-size: 12px; color: rgba(255,255,255,.5); }
+    .chat-bubble {
+      background: rgba(255,255,255,.1);
+      border-radius: 10px; padding: 12px 16px;
+      font-size: 13px; color: rgba(255,255,255,.8);
+      margin-bottom: 8px; position: relative;
+    }
+    .chat-bubble.user { background: rgba(232,113,26,.25); margin-left: 24px; }
+    .chat-bubble.bot  { background: rgba(27,122,78,.25); margin-right: 24px; }
+    .chat-bubble .label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 5px; opacity: .7; }
+    .cite-tag {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: rgba(212,160,23,.2); color: var(--gold-l);
+      font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 99px;
+      margin-top: 6px;
+    }
+    .jurisdiction-toggle {
+      display: flex; gap: 8px; margin-bottom: 14px;
+    }
+    .jt-btn {
+      flex: 1; padding: 8px 12px; border-radius: 8px;
+      font-size: 12px; font-weight: 700; text-align: center; cursor: pointer;
+      transition: all .2s;
+    }
+    .jt-btn.active { background: var(--saffron); color: var(--white); }
+    .jt-btn:not(.active) { background: rgba(255,255,255,.08); color: rgba(255,255,255,.5); }
+
+    /* ── Problem Statement ───────────────────────────────────────── */
+    #problem {
+      padding: 100px 0;
+      background: var(--cream);
+    }
+    .problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+    .problem-card {
+      background: var(--white); border-radius: var(--r-lg);
+      padding: 32px; box-shadow: var(--shadow-md);
+      display: flex; flex-direction: column; gap: 20px;
+    }
+    .problem-item {
+      display: flex; gap: 16px; align-items: flex-start;
+    }
+    .problem-icon {
+      width: 44px; height: 44px; flex-shrink: 0;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+    .problem-icon.red    { background: #FEE2E2; }
+    .problem-icon.amber  { background: #FEF3C7; }
+    .problem-icon.blue   { background: #DBEAFE; }
+    .problem-text h4 { font-size: 15px; font-weight: 700; color: var(--ink); }
+    .problem-text p  { font-size: 13px; color: var(--ink-l); margin-top: 4px; line-height: 1.6; }
+
+    /* ── Features ────────────────────────────────────────────────── */
+    #features { padding: 100px 0; }
+    .features-header { text-align: center; margin-bottom: 60px; }
+    .features-header .section-sub { margin: 14px auto 0; }
+    .feature-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 32px;
+      transition: all .3s;
+      position: relative; overflow: hidden;
+    }
+    .feature-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--saffron), var(--gold));
+      opacity: 0; transition: opacity .3s;
+    }
+    .feature-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-4px); border-color: transparent; }
+    .feature-card:hover::before { opacity: 1; }
+    .feature-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; margin-bottom: 20px;
+    }
+    .feature-icon.s { background: #FEF0E3; }
+    .feature-icon.g { background: var(--green-xl); }
+    .feature-icon.b { background: #DBEAFE; }
+    .feature-icon.p { background: #F3E8FF; }
+    .feature-icon.y { background: #FBF4DC; }
+    .feature-icon.r { background: #FFE4E6; }
+    .feature-title { font-size: 17px; font-weight: 700; color: var(--ink); margin-bottom: 10px; }
+    .feature-desc  { font-size: 14px; color: var(--ink-l); line-height: 1.7; }
+    .feature-tags  { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 18px; }
+    .feature-tag {
+      font-size: 11px; font-weight: 600; padding: 4px 10px;
+      border-radius: 99px; background: var(--cream-d); color: var(--ink-m);
+    }
+
+    /* ── How It Works ────────────────────────────────────────────── */
+    #how {
+      padding: 100px 0;
+      background: linear-gradient(160deg, #0D1F3C 0%, #1B3A6B 60%, #1B4D3E 100%);
+      position: relative; overflow: hidden;
+    }
+    #how .hero-orb-1 { opacity: .15; }
+    .how-header { text-align: center; margin-bottom: 60px; }
+    .how-header .section-title { color: var(--white); }
+    .how-header .section-sub { color: rgba(255,255,255,.6); margin: 14px auto 0; }
+    .steps-wrap { position: relative; }
+    .steps-line {
+      position: absolute; top: 40px; left: 50%; transform: translateX(-50%);
+      width: calc(100% - 200px); height: 2px;
+      background: linear-gradient(90deg, var(--saffron), var(--gold), var(--green));
+      opacity: .3;
+    }
+    .steps-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+    .step-card {
+      background: rgba(255,255,255,.06);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: var(--r-lg); padding: 28px 20px;
+      text-align: center;
+      transition: all .3s;
+    }
+    .step-card:hover { background: rgba(255,255,255,.1); transform: translateY(-4px); }
+    .step-number {
+      width: 56px; height: 56px; margin: 0 auto 20px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; font-weight: 800;
+      font-family: 'Playfair Display', serif;
+    }
+    .step-number.n1 { background: rgba(232,113,26,.3); color: #FFB47A; border: 2px solid rgba(232,113,26,.5); }
+    .step-number.n2 { background: rgba(212,160,23,.3); color: #F2C94C; border: 2px solid rgba(212,160,23,.5); }
+    .step-number.n3 { background: rgba(27,122,78,.3);  color: #6EE7B7; border: 2px solid rgba(27,122,78,.5); }
+    .step-number.n4 { background: rgba(99,102,241,.3); color: #A5B4FC; border: 2px solid rgba(99,102,241,.5); }
+    .step-icon { font-size: 28px; margin-bottom: 8px; }
+    .step-title { font-size: 15px; font-weight: 700; color: var(--white); margin-bottom: 10px; }
+    .step-desc  { font-size: 13px; color: rgba(255,255,255,.55); line-height: 1.65; }
+
+    /* ── Jurisdictions ───────────────────────────────────────────── */
+    #jurisdiction { padding: 100px 0; background: var(--cream); }
+    .jurisdiction-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 52px; }
+    .jurisdiction-panel {
+      background: var(--white); border-radius: var(--r-lg);
+      box-shadow: var(--shadow-md); overflow: hidden;
+    }
+    .panel-header {
+      padding: 24px 28px;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .panel-header.india  { background: linear-gradient(135deg, var(--saffron), #F59E0B); }
+    .panel-header.global { background: linear-gradient(135deg, #1B3A6B, var(--green)); }
+    .panel-flag { font-size: 32px; }
+    .panel-title { font-size: 18px; font-weight: 800; color: var(--white); }
+    .panel-sub   { font-size: 12px; color: rgba(255,255,255,.7); margin-top: 2px; }
+    .panel-body  { padding: 24px 28px; }
+    .regime-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 12px 0; border-bottom: 1px solid var(--border);
+    }
+    .regime-item:last-child { border-bottom: none; }
+    .regime-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 7px;
+    }
+    .regime-dot.s { background: var(--saffron); }
+    .regime-dot.g { background: var(--green); }
+    .regime-dot.b { background: #3B82F6; }
+    .regime-dot.p { background: #8B5CF6; }
+    .regime-dot.y { background: var(--gold); }
+    .regime-name { font-size: 14px; font-weight: 600; color: var(--ink); }
+    .regime-desc { font-size: 12px; color: var(--ink-l); margin-top: 2px; }
+
+    /* ── Formulation Classification ──────────────────────────────── */
+    #classify { padding: 100px 0; }
+    .classify-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 60px; align-items: start; }
+    .classify-cards { display: flex; flex-direction: column; gap: 14px; }
+    .classify-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 18px 20px;
+      display: flex; gap: 14px; align-items: flex-start;
+      cursor: pointer; transition: all .2s;
+    }
+    .classify-card:hover, .classify-card.active {
+      border-color: var(--saffron);
+      box-shadow: 0 0 0 3px rgba(232,113,26,.1);
+    }
+    .classify-card.active { background: #FEF0E3; }
+    .classify-card-icon { font-size: 24px; flex-shrink: 0; }
+    .classify-card-text h4 { font-size: 14px; font-weight: 700; color: var(--ink); }
+    .classify-card-text p  { font-size: 12px; color: var(--ink-l); margin-top: 3px; line-height: 1.55; }
+    .classify-card-badge {
+      margin-left: auto; flex-shrink: 0;
+      font-size: 10px; font-weight: 700; padding: 3px 8px;
+      border-radius: 99px; text-transform: uppercase; letter-spacing: .05em;
+    }
+    .badge-tkdl   { background: #FEE2E2; color: #B91C1C; }
+    .badge-patent { background: var(--green-xl); color: var(--green); }
+    .badge-gi     { background: #DBEAFE; color: #1D4ED8; }
+    .badge-sec3p  { background: #FEF3C7; color: #92400E; }
+    .demo-panel {
+      background: var(--ink);
+      border-radius: var(--r-xl); padding: 32px;
+      position: sticky; top: 100px;
+    }
+    .demo-topbar {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 20px;
+    }
+    .dot-red    { width:12px; height:12px; border-radius:50%; background:#FF5F57; }
+    .dot-yellow { width:12px; height:12px; border-radius:50%; background:#FEBC2E; }
+    .dot-green  { width:12px; height:12px; border-radius:50%; background:#28C840; }
+    .demo-topbar span { font-size: 13px; color: rgba(255,255,255,.4); margin-left: auto; }
+    .demo-scroll { max-height: 440px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+    .demo-scroll::-webkit-scrollbar { width: 4px; }
+    .demo-scroll::-webkit-scrollbar-track { background: transparent; }
+    .demo-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 2px; }
+    .dm-user {
+      background: rgba(232,113,26,.2);
+      border-radius: 12px 12px 3px 12px;
+      padding: 12px 16px; margin-left: 32px;
+    }
+    .dm-bot {
+      background: rgba(27,122,78,.18);
+      border-radius: 12px 12px 12px 3px;
+      padding: 12px 16px; margin-right: 16px;
+    }
+    .dm-label {
+      font-size: 10px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; margin-bottom: 6px;
+    }
+    .dm-user .dm-label { color: var(--saffron); }
+    .dm-bot  .dm-label { color: var(--green-l); }
+    .dm-text { font-size: 13px; color: rgba(255,255,255,.85); line-height: 1.6; }
+    .dm-cite {
+      margin-top: 10px; padding-top: 10px;
+      border-top: 1px solid rgba(255,255,255,.08);
+      display: flex; flex-wrap: wrap; gap: 6px;
+    }
+    .dm-cite-pill {
+      font-size: 10px; font-weight: 600;
+      background: rgba(212,160,23,.2); color: var(--gold-l);
+      padding: 3px 8px; border-radius: 99px;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .dm-conf {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 10px; color: rgba(255,255,255,.4); margin-top: 8px;
+    }
+    .conf-bar {
+      width: 60px; height: 4px; background: rgba(255,255,255,.1); border-radius: 2px; overflow: hidden;
+    }
+    .conf-fill { height: 100%; border-radius: 2px; background: var(--green-l); }
+    .demo-input {
+      margin-top: 20px; display: flex; gap: 8px;
+    }
+    .demo-input input {
+      flex: 1; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1);
+      border-radius: 10px; padding: 12px 16px; color: rgba(255,255,255,.8);
+      font-size: 13px; outline: none; font-family: inherit;
+    }
+    .demo-input input::placeholder { color: rgba(255,255,255,.3); }
+    .demo-send {
+      width: 42px; height: 42px; border-radius: 10px;
+      background: var(--saffron); border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 16px; transition: .2s;
+    }
+    .demo-send:hover { background: var(--saffron-d); }
+
+    /* ── Tech Stack ──────────────────────────────────────────────── */
+    #tech {
+      padding: 100px 0;
+      background: var(--cream);
+    }
+    .tech-header { text-align: center; margin-bottom: 60px; }
+    .tech-layers { display: flex; flex-direction: column; gap: 20px; }
+    .tech-layer {
+      background: var(--white); border-radius: var(--r-lg);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .layer-header {
+      display: flex; align-items: center; gap: 14px;
+      padding: 18px 24px;
+      background: linear-gradient(90deg, rgba(232,113,26,.06), transparent);
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+    }
+    .layer-icon { font-size: 22px; }
+    .layer-title { font-size: 15px; font-weight: 700; color: var(--ink); }
+    .layer-badge {
+      font-size: 10px; font-weight: 700; letter-spacing: .06em;
+      text-transform: uppercase; background: var(--cream-d); color: var(--ink-m);
+      padding: 3px 10px; border-radius: 99px; margin-left: auto;
+    }
+    .layer-body { padding: 20px 24px; display: flex; flex-wrap: wrap; gap: 10px; }
+    .tech-chip {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: var(--cream-d); border-radius: 8px;
+      padding: 8px 14px; font-size: 13px; font-weight: 500; color: var(--ink-m);
+    }
+    .tech-chip .tech-dot { width: 7px; height: 7px; border-radius: 50%; }
+    .tc-s { background: var(--saffron); }
+    .tc-g { background: var(--green); }
+    .tc-b { background: #3B82F6; }
+    .tc-p { background: #8B5CF6; }
+    .tc-y { background: var(--gold); }
+    .tc-r { background: #EF4444; }
+
+    /* ── Roadmap ─────────────────────────────────────────────────── */
+    #roadmap {
+      padding: 100px 0;
+      background: linear-gradient(160deg, #0D1F3C 0%, #1B3A6B 60%, #1B4D3E 100%);
+    }
+    .roadmap-header { text-align: center; margin-bottom: 60px; }
+    .roadmap-header .section-title { color: var(--white); }
+    .roadmap-header .section-sub { color: rgba(255,255,255,.6); margin: 14px auto 0; }
+    .roadmap-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .roadmap-card {
+      background: rgba(255,255,255,.06);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: var(--r-lg); padding: 30px 24px;
+      transition: .3s;
+    }
+    .roadmap-card:hover { background: rgba(255,255,255,.1); transform: translateY(-4px); }
+    .roadmap-phase {
+      font-size: 11px; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; margin-bottom: 14px;
+    }
+    .roadmap-phase.p1 { color: var(--saffron); }
+    .roadmap-phase.p2 { color: var(--gold-l); }
+    .roadmap-phase.p3 { color: var(--green-l); }
+    .roadmap-title {
+      font-size: 19px; font-weight: 800; color: var(--white);
+      font-family: 'Playfair Display', serif; margin-bottom: 6px;
+    }
+    .roadmap-time { font-size: 12px; color: rgba(255,255,255,.4); margin-bottom: 18px; }
+    .roadmap-items { display: flex; flex-direction: column; gap: 10px; }
+    .roadmap-item {
+      display: flex; gap: 10px; align-items: flex-start;
+    }
+    .roadmap-check { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+    .roadmap-item p { font-size: 13px; color: rgba(255,255,255,.65); line-height: 1.5; }
+
+    /* ── Impact ──────────────────────────────────────────────────── */
+    #impact { padding: 100px 0; }
+    .impact-header { text-align: center; margin-bottom: 60px; }
+    .impact-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+    .impact-card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: 28px 24px; text-align: center;
+      transition: .3s;
+    }
+    .impact-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-4px); }
+    .impact-icon { font-size: 36px; margin-bottom: 14px; }
+    .impact-value {
+      font-size: 36px; font-weight: 800; font-family: 'Playfair Display', serif;
+      background: linear-gradient(135deg, var(--saffron), var(--gold));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: 6px;
+    }
+    .impact-label { font-size: 14px; font-weight: 600; color: var(--ink); }
+    .impact-sub   { font-size: 12px; color: var(--ink-l); margin-top: 4px; }
+
+    /* ── Team ────────────────────────────────────────────────────── */
+    #team { padding: 100px 0; background: var(--cream); }
+    .team-header { text-align: center; margin-bottom: 60px; }
+    .team-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; }
+    .team-card {
+      background: var(--white); border-radius: var(--r-lg);
+      padding: 28px 20px; text-align: center;
+      box-shadow: var(--shadow-sm); transition: .3s;
+    }
+    .team-card:hover { box-shadow: var(--shadow-md); transform: translateY(-4px); }
+    .team-avatar {
+      width: 72px; height: 72px; border-radius: 50%;
+      margin: 0 auto 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; font-weight: 800;
+      font-family: 'Playfair Display', serif;
+      color: var(--white);
+    }
+    .av-s { background: linear-gradient(135deg, var(--saffron), var(--gold)); }
+    .av-g { background: linear-gradient(135deg, var(--green), #0D6E45); }
+    .av-b { background: linear-gradient(135deg, #1D4ED8, #6D28D9); }
+    .av-p { background: linear-gradient(135deg, #6D28D9, #DB2777); }
+    .av-t { background: linear-gradient(135deg, #0EA5E9, var(--green)); }
+    .team-name { font-size: 15px; font-weight: 700; color: var(--ink); }
+    .team-role { font-size: 12px; color: var(--ink-l); margin-top: 4px; }
+    .team-skills { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; margin-top: 12px; }
+    .team-skill {
+      font-size: 10px; font-weight: 600; padding: 3px 8px;
+      border-radius: 99px; background: var(--cream-d); color: var(--ink-m);
+    }
+
+    /* ── SIH Badge ───────────────────────────────────────────────── */
+    #sih { padding: 100px 0; }
+    .sih-inner {
+      background: linear-gradient(135deg, var(--ink), #1B3A6B);
+      border-radius: var(--r-xl); padding: 60px;
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .sih-inner::before {
+      content: ''; position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .sih-badge-row {
+      display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;
+      margin-bottom: 32px;
+    }
+    .sih-badge {
+      background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15);
+      border-radius: 12px; padding: 14px 22px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .sih-badge-icon { font-size: 22px; }
+    .sih-badge-text { text-align: left; }
+    .sih-badge-label { font-size: 10px; color: rgba(255,255,255,.45); letter-spacing: .06em; text-transform: uppercase; }
+    .sih-badge-value { font-size: 15px; font-weight: 700; color: var(--white); }
+    .sih-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(24px, 3.5vw, 40px);
+      font-weight: 800; color: var(--white);
+      margin-bottom: 14px;
+    }
+    .sih-sub { font-size: 16px; color: rgba(255,255,255,.6); max-width: 600px; margin: 0 auto 36px; line-height: 1.7; }
+    .sih-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .prize-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, var(--gold), var(--saffron));
+      color: var(--white); font-size: 14px; font-weight: 800;
+      padding: 10px 22px; border-radius: 99px;
+      box-shadow: 0 6px 20px rgba(212,160,23,.4);
+    }
+
+    /* ── Footer ──────────────────────────────────────────────────── */
+    footer {
+      background: var(--ink);
+      color: rgba(255,255,255,.6);
+      padding: 48px 0 32px;
+    }
+    .footer-inner {
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px;
+    }
+    .footer-brand { }
+    .footer-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+    .footer-logo-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--saffron), var(--gold));
+      display: flex; align-items: center; justify-content: center; font-size: 18px;
+    }
+    .footer-logo-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 16px; font-weight: 800; color: var(--white);
+    }
+    .footer-desc { font-size: 13px; line-height: 1.7; max-width: 240px; }
+    .footer-col h4 { font-size: 13px; font-weight: 700; color: var(--white); margin-bottom: 14px; letter-spacing: .04em; }
+    .footer-col ul li { margin-bottom: 8px; }
+    .footer-col ul li a { font-size: 13px; color: rgba(255,255,255,.5); transition: color .2s; }
+    .footer-col ul li a:hover { color: var(--saffron); }
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,.08);
+      margin-top: 40px; padding-top: 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px;
+    }
+    .footer-bottom p { font-size: 12px; }
+    .disclaimer {
+      font-size: 11px; color: rgba(255,255,255,.3);
+      background: rgba(255,255,255,.04); border-radius: 8px; padding: 10px 16px;
+      margin-top: 12px;
+    }
+
+    /* ── Scroll progress ─────────────────────────────────────────── */
+    #progress-bar {
+      position: fixed; top: 0; left: 0; height: 3px; z-index: 1001;
+      background: linear-gradient(90deg, var(--saffron), var(--gold), var(--green));
+      width: 0%; transition: width .1s;
+    }
+
+    /* ── Responsive ──────────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .hero-inner        { grid-template-columns: 1fr; }
+      .hero-visual       { display: none; }
+      .problem-grid      { grid-template-columns: 1fr; }
+      .jurisdiction-grid { grid-template-columns: 1fr; }
+      .classify-grid     { grid-template-columns: 1fr; }
+      .demo-panel        { display: none; }
+      .footer-inner      { grid-template-columns: 1fr 1fr; }
+      .roadmap-grid      { grid-template-columns: 1fr; }
+      .steps-grid        { grid-template-columns: 1fr 1fr; }
+      .steps-line        { display: none; }
+      .sih-inner         { padding: 40px 24px; }
+    }
+    @media (max-width: 600px) {
+      .nav-links         { display: none; }
+      .hamburger         { display: flex; }
+      .footer-inner      { grid-template-columns: 1fr; }
+      .steps-grid        { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Progress Bar -->
+<div id="progress-bar"></div>
+
+<!-- ── Navbar ─────────────────────────────────────────────────────── -->
+<nav id="navbar">
+  <div class="container">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">
+        <div class="logo-emblem">⚖️</div>
+        <div class="logo-text">
+          <div class="logo-title">IP-SAKTI</div>
+          <div class="logo-sub">Sahayak · SIH26045</div>
+        </div>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#problem">Problem</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#how">How It Works</a></li>
+        <li><a href="#jurisdiction">Coverage</a></li>
+        <li><a href="#tech">Tech Stack</a></li>
+        <li><a href="#team">Team</a></li>
+        <li><a href="#sih" class="nav-cta">SIH 2026</a></li>
+      </ul>
+      <button class="hamburger" aria-label="Menu" onclick="toggleMenu()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Hero ───────────────────────────────────────────────────────── -->
+<section id="hero">
+  <div class="hero-bg-pattern"></div>
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+  <div class="hero-orb hero-orb-3"></div>
+  <div class="container">
+    <div class="hero-inner">
+      <!-- Left -->
+      <div class="hero-left">
+        <div class="hero-badge">
+          <span class="dot"></span>
+          SIH26045 · Ministry of Ayush
+        </div>
+        <h1 class="hero-title">
+          IP-SAKTI <span class="accent">Sahayak</span>
+        </h1>
+        <p class="hero-sub">
+          A multilingual, RAG-based AI assistant for <strong style="color:rgba(255,255,255,.9)">Intellectual Property &amp; regulatory guidance</strong> in Ayurveda — across national and international regimes, with source citations and zero hallucination.
+        </p>
+        <div class="hero-actions">
+          <a href="#features" class="btn btn-primary">🔍 Explore Features</a>
+          <a href="#how" class="btn btn-outline">▶ How It Works</a>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="hero-stat-value">7+</div>
+            <div class="hero-stat-label">IP Regimes Covered</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-value">22+</div>
+            <div class="hero-stat-label">Indian Languages</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-value">100%</div>
+            <div class="hero-stat-label">Source-Cited Answers</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-value">₹1L</div>
+            <div class="hero-stat-label">Cash Prize</div>
+          </div>
+        </div>
+      </div>
+      <!-- Right Visual -->
+      <div class="hero-visual">
+        <div class="jurisdiction-toggle">
+          <div class="jt-btn active">🇮🇳 India</div>
+          <div class="jt-btn">🌐 International</div>
+        </div>
+        <div class="hero-card">
+          <div class="hero-card-header">
+            <div class="hero-card-icon ic-saffron">💬</div>
+            <div>
+              <div class="hero-card-title">Live Assistant Demo</div>
+              <div class="hero-card-sub">RAG · Source-cited · Multilingual</div>
+            </div>
+          </div>
+          <div class="chat-bubble user">
+            <div class="label">You</div>
+            Can I patent an Ayurvedic formulation from the Ashtanga Hridayam?
+          </div>
+          <div class="chat-bubble bot">
+            <div class="label">IP-SAKTI</div>
+            No — formulations drawn verbatim from a First-Schedule text fall under <strong>Section 3(p)</strong> of the Patents Act and are non-patentable. However, if you develop a novel delivery mechanism or a scientifically validated new combination, patent protection may be available.
+            <div class="cite-tag">📜 Patents Act §3(p)</div>
+            <div class="cite-tag">📚 TKDL Prior-Art</div>
+          </div>
+        </div>
+        <div class="hero-card">
+          <div class="hero-card-header">
+            <div class="hero-card-icon ic-gold">🗺️</div>
+            <div>
+              <div class="hero-card-title">Formulation Classifier</div>
+              <div class="hero-card-sub">6 categories · ABS compliance</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <span class="cite-tag">Classical Medicine</span>
+            <span class="cite-tag">Proprietary Drug</span>
+            <span class="cite-tag">New Drug</span>
+            <span class="cite-tag">Phytopharmaceutical</span>
+            <span class="cite-tag">Nutraceutical</span>
+            <span class="cite-tag">Cosmetic</span>
+          </div>
+        </div>
+        <div class="hero-card">
+          <div class="hero-card-header">
+            <div class="hero-card-icon ic-green">🌐</div>
+            <div>
+              <div class="hero-card-title">Jurisdiction Toggle</div>
+              <div class="hero-card-sub">India vs International — never conflated</div>
+            </div>
+          </div>
+          <div style="font-size:13px;color:rgba(255,255,255,.6);line-height:1.6">
+            Switch instantly between the domestic framework (Patents Act, GI, BDA 2023) and international treaties (TRIPS, Nagoya Protocol, WIPO GRATK 2024, PCT).
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Problem Statement ──────────────────────────────────────────── -->
+<section id="problem">
+  <div class="container">
+    <div class="problem-grid">
+      <div>
+        <div class="section-tag saffron">⚠️ The Problem</div>
+        <h2 class="section-title">Ayurveda's IP Gap is Real — and Costly</h2>
+        <p class="section-sub">
+          Practitioners, researchers, AYUSH startups and cultivators navigate overlapping legal regimes with no authoritative guidance tool. The result: legitimate innovation is under-protected, while India's traditional knowledge remains exposed to misappropriation abroad.
+        </p>
+        <div style="margin-top:32px;display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;align-items:center;gap:12px;background:white;border-radius:12px;padding:16px 20px;box-shadow:var(--shadow-sm)">
+            <span style="font-size:24px">📉</span>
+            <div>
+              <div style="font-size:14px;font-weight:700;color:var(--ink)">Under-protected Innovation</div>
+              <div style="font-size:13px;color:var(--ink-l);margin-top:2px">Classical and novel Ayurvedic formulations often go unprotected due to lack of IP literacy</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;background:white;border-radius:12px;padding:16px 20px;box-shadow:var(--shadow-sm)">
+            <span style="font-size:24px">🌍</span>
+            <div>
+              <div style="font-size:14px;font-weight:700;color:var(--ink)">Biopiracy Risk</div>
+              <div style="font-size:13px;color:var(--ink-l);margin-top:2px">Traditional knowledge faces misappropriation in foreign jurisdictions through patent filings</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;background:white;border-radius:12px;padding:16px 20px;box-shadow:var(--shadow-sm)">
+            <span style="font-size:24px">📋</span>
+            <div>
+              <div style="font-size:14px;font-weight:700;color:var(--ink)">Rapid Regulatory Changes</div>
+              <div style="font-size:13px;color:var(--ink-l);margin-top:2px">2024 Patent Rules, WIPO GRATK Treaty, BDA 2023 Amendments — no consolidated guidance exists</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="problem-card">
+        <div style="font-size:16px;font-weight:700;color:var(--ink);margin-bottom:8px">The Overlapping Regimes</div>
+        <div style="font-size:13px;color:var(--ink-l);margin-bottom:20px">Every Ayurvedic product must navigate all of these simultaneously:</div>
+        <div class="problem-item">
+          <div class="problem-icon red">⚖️</div>
+          <div class="problem-text">
+            <h4>IP Law</h4>
+            <p>Patents, GI, Trademarks, Copyright, Designs, Trade Secrets, Plant-Variety Rights</p>
+          </div>
+        </div>
+        <div class="problem-item">
+          <div class="problem-icon amber">🌿</div>
+          <div class="problem-text">
+            <h4>Biological Diversity</h4>
+            <p>Access-and-Benefit-Sharing under BDA 2023 &amp; 2024 Rules; ABS compliance for bio-resources</p>
+          </div>
+        </div>
+        <div class="problem-item">
+          <div class="problem-icon blue">💊</div>
+          <div class="problem-text">
+            <h4>Drug Regulation</h4>
+            <p>Drugs &amp; Cosmetics Act, AYUSH Drug Licensing, Phytopharmaceutical, FSSAI Ayurveda-Aahar</p>
+          </div>
+        </div>
+        <div class="problem-item">
+          <div class="problem-icon red">📢</div>
+          <div class="problem-text">
+            <h4>Advertising &amp; Labelling</h4>
+            <p>Drugs and Magic Remedies Act, ASCI Guidelines, mandatory disclaimers</p>
+          </div>
+        </div>
+        <div class="problem-item">
+          <div class="problem-icon amber">🌐</div>
+          <div class="problem-text">
+            <h4>International Treaties</h4>
+            <p>TRIPS, CBD, Nagoya Protocol, WIPO GRATK 2024, PCT, Budapest Treaty, Madrid &amp; Hague Systems</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Features ───────────────────────────────────────────────────── -->
+<section id="features">
+  <div class="container">
+    <div class="features-header">
+      <div class="section-tag">✨ Core Capabilities</div>
+      <h2 class="section-title">Everything an AYUSH Innovator Needs</h2>
+      <p class="section-sub">From formulation classification to international treaty compliance — IP-SAKTI Sahayak covers the full spectrum.</p>
+    </div>
+    <div class="grid-3">
+
+      <div class="feature-card">
+        <div class="feature-icon s">🔍</div>
+        <div class="feature-title">RAG-Powered Answers</div>
+        <div class="feature-desc">Every response is grounded in a curated, version-tracked corpus of statutes, rules, treaties, pharmacopoeial standards, registry records and case law. Zero hallucination.</div>
+        <div class="feature-tags">
+          <span class="feature-tag">Source-cited</span>
+          <span class="feature-tag">Version-tracked</span>
+          <span class="feature-tag">Anti-hallucination</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon g">🗺️</div>
+        <div class="feature-title">Jurisdiction Toggle</div>
+        <div class="feature-desc">An explicit India ↔ International switch keeps domestic and international legal answers visibly separate — never conflated. Both regimes answered with full statutory citations.</div>
+        <div class="feature-tags">
+          <span class="feature-tag">India</span>
+          <span class="feature-tag">International</span>
+          <span class="feature-tag">TRIPS / Nagoya</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon y">🌿</div>
+        <div class="feature-title">Formulation Classifier</div>
+        <div class="feature-desc">Asks minimum clarifying questions to classify your product: Classical, Proprietary, New Drug, Phytopharmaceutical, Ayurveda-Aahar, or Cosmetic — and explains each category's IP posture.</div>
+        <div class="feature-tags">
+          <span class="feature-tag">6 Categories</span>
+          <span class="feature-tag">ABS Posture</span>
+          <span class="feature-tag">Regulatory Path</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon b">🛡️</div>
+        <div class="feature-title">ABS Compliance Helper</div>
+        <div class="feature-desc">Guides users through Access-and-Benefit-Sharing obligations under the Biological Diversity Act (2023 amendments &amp; 2024 Rules) and links to NBA/SBB portals and IRCC requirements.</div>
+        <div class="feature-tags">
+          <span class="feature-tag">BDA 2023</span>
+          <span class="feature-tag">NBA / SBB</span>
+          <span class="feature-tag">IRCC</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon p">📚</div>
+        <div class="feature-title">TKDL Prior-Art Pointer</div>
+        <div class="feature-desc">Instantly surfaces relevant TKDL records and prior-art references to defend against biopiracy claims or to assess patentability before filing. Includes CSIR-TKDL integration pathway.</div>
+        <div class="feature-tags">
+          <span class="feature-tag">TKDL</span>
+          <span class="feature-tag">Prior-Art</span>
+          <span class="feature-tag">§3(p) Defense</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon s">🌐</div>
+        <div class="feature-title">Multilingual Delivery</div>
+        <div class="feature-desc">Answers in 22+ Indian languages via Bhashini integration. Voice input/output support enables oral-tradition communities and field practitioners to interact naturally.</div>
+        <div class="feature-tags">
+          <span class="feature-tag">Bhashini API</span>
+          <span class="feature-tag">22+ Languages</span>
+          <span class="feature-tag">Voice Support</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon g">📊</div>
+        <div class="feature-title">Confidence Indicator</div>
+        <div class="feature-desc">Every answer carries a confidence score, a mandatory "information, not legal advice" disclaimer, and a clear path to escalate to a human IP facilitator when certainty is low.</div>
+        <div class="feature-tags">
+          <span class="feature-tag">Confidence Score</span>
+          <span class="feature-tag">Safe Abstention</span>
+          <span class="feature-tag">Human Escalation</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon b">🔗</div>
+        <div class="feature-title">Knowledge Graph Engine</div>
+        <div class="feature-desc">A relational knowledge graph linking statutes, treaties, case law, and product categories enables multi-step legal reasoning across interconnected regulatory domains.</div>
+        <div class="feature-tags">
+          <span class="feature-tag">Graph RAG</span>
+          <span class="feature-tag">Multi-hop Reasoning</span>
+          <span class="feature-tag">Agentic</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon p">🔒</div>
+        <div class="feature-title">Privacy &amp; Audit Guardrails</div>
+        <div class="feature-desc">Fully compliant with the Digital Personal Data Protection Act 2023. Audit logs, privacy-by-design, and AI-safety guardrails prevent misuse and protect sensitive formulation data.</div>
+        <div class="feature-tags">
+          <span class="feature-tag">DPDP 2023</span>
+          <span class="feature-tag">Audit Trail</span>
+          <span class="feature-tag">AI Safety</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── How It Works ───────────────────────────────────────────────── -->
+<section id="how">
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="container">
+    <div class="how-header">
+      <div class="section-tag">⚙️ Process</div>
+      <h2 class="section-title">How IP-SAKTI Sahayak Works</h2>
+      <p class="section-sub">A four-step pipeline from query to cited, jurisdiction-aware answer — powered by retrieval-augmented generation.</p>
+    </div>
+    <div class="steps-wrap">
+      <div class="steps-line"></div>
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-number n1">1</div>
+          <div class="step-icon">💬</div>
+          <div class="step-title">Query in Any Language</div>
+          <div class="step-desc">Ask in Hindi, Tamil, Sanskrit or English — via text or voice. Bhashini handles real-time translation. Set jurisdiction: India or International.</div>
+        </div>
+        <div class="step-card">
+          <div class="step-number n2">2</div>
+          <div class="step-icon">🔎</div>
+          <div class="step-title">Classify &amp; Route</div>
+          <div class="step-desc">The system classifies your formulation, identifies applicable IP types, and routes the query to the right legal corpus segments in the RAG vector store.</div>
+        </div>
+        <div class="step-card">
+          <div class="step-number n3">3</div>
+          <div class="step-icon">📖</div>
+          <div class="step-title">Retrieve &amp; Reason</div>
+          <div class="step-desc">Chunks from statutes, rules, treaties and case law are retrieved. The knowledge graph enables multi-hop reasoning across connected legal domains.</div>
+        </div>
+        <div class="step-card">
+          <div class="step-number n4">4</div>
+          <div class="step-icon">✅</div>
+          <div class="step-title">Cited Answer + Escalation</div>
+          <div class="step-desc">A structured answer with statute citations, confidence score, disclaimer, and optional link to a human IP facilitator — delivered in your language.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Jurisdiction Coverage ──────────────────────────────────────── -->
+<section id="jurisdiction">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:52px">
+      <div class="section-tag gold">⚖️ Legal Coverage</div>
+      <h2 class="section-title">National &amp; International Regimes</h2>
+      <p class="section-sub" style="margin:14px auto 0">Two answer-sets, visibly separate — the India layer and the international layer are never conflated.</p>
+    </div>
+    <div class="jurisdiction-grid">
+      <!-- India Panel -->
+      <div class="jurisdiction-panel">
+        <div class="panel-header india">
+          <div class="panel-flag">🇮🇳</div>
+          <div>
+            <div class="panel-title">India — Domestic Framework</div>
+            <div class="panel-sub">National statutes, rules &amp; regulatory regimes</div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="regime-item">
+            <div class="regime-dot s"></div>
+            <div>
+              <div class="regime-name">Patents Act + 2024 Rules</div>
+              <div class="regime-desc">Patentability, §3(p) bar, traditional knowledge exceptions, PCT national phase</div>
+            </div>
+          </div>
+          <div class="regime-item">
+            <div class="regime-dot b"></div>
+            <div>
+              <div class="regime-name">Geographical Indications</div>
+              <div class="regime-desc">GI registration for Ayurvedic products, producer associations, GI Registry</div>
+            </div>
+          </div>
+          <div class="regime-item">
+            <div class="regime-dot p"></div>
+            <div>
+              <div class="regime-name">Trade Marks Act</div>
+              <div class="regime-desc">Brand protection, collective marks, certification marks for AYUSH products</div>
+            </div>
+          </div>
+          <div class="regime-item">
+            <div class="regime-dot g"></div>
+            <div>
+              <div class="regime-name">Biological Diversity Act 2023</div>
+              <div class="regime-desc">ABS compliance, NBA/SBB approvals, IRCC, 2024 Rules, penalty provisions</div>
+            </div>
+          </div>
+          <div class="regime-item">
+            <div class="regime-dot y"></div>
+            <div>
+              <div class="regime-name">Drugs &amp; Cosmetics Act</div>
+              <div class="regime-desc">Classical, proprietary, new drug, phytopharmaceutical licensing &amp; standards</div>
+            </div>
+          </div>
+          <div class="regime-item">
+            <div class="regime-dot s"></div>
+            <div>
+              <div class="regime-name">FSSAI Ayurveda-Aahar</div>
+              <div class="regime-desc">Nutraceutical classification, labelling, health claims for AYUSH products</div>
+            </div>
+          </div>
+          <div class="regime-item">
+            <div class="regime-dot b"></div>
+            <div>
+              <div class="regime-name">Designs &amp; Copyright Act</div>
+              <div class="regime-desc">Packaging design, artistic works in formulation documentation</div>
+            </div>
+          </div>
+          <div class="regime-item" style="border-bottom:none">
+            <div class="regime-dot p"></div>
+            <div>
+              <div class="regime-name">DPDP Act 2023</div>
+              <div class="regime-desc">Personal data protection for patient and research data in AYUSH applications</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- International Panel -->
+      <div class="jurisdiction-panel">
+        <div class="panel-header global">
+          <div class="panel-flag">🌐</div>
+          <div>
+            <div class="panel-title">International — Treaty Framework</div>
+            <div class="panel-sub">Global IP treaties, protocols &amp; export market regimes</div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="regime-item">
+            <div class="regime-dot s"></div>
+            <div>
+              <div class="regime-name">TRIPS Agreement</div>
+              <div class="regime-desc">Minimum IP standards, disclosure of origin, Article 27.3(b) flexibilities</div>
+            </div>
+          </div>
+          <div class="regime-item">
+            <div class="regime-dot g"></div>
+            <div>
+              <div class="regime-name">Nagoya Protocol (CBD)</div>
+              <div class="regime-desc">Access and benefit sharing for genetic resources used in Ayurvedic products</div>
+            </div>
+          </div>
+          <div class="regime-item">
+            <div class="regime-dot y"></div>
+            <div>
+              <div class="regime-name">WIPO GRATK Treaty 2024</div>
+              <div class="regime-desc">Disclosure of origin for GR/TK in patent applications — new 2024 obligations</div>
+            </div>
+          </div>
+          <div class="regime-item">
+            <div class="regime-dot b"></div>
+            <div>
+              <div class="regime-name">PCT (Patent Cooperation Treaty)</div>
+              <div class="regime-desc">International patent filing strategy for novel Ayurvedic innovations</div>
+            </div>
+          </div>
+          <div class="regime-item">
+            <div class="regime-dot p"></div>
+            <div>
+              <div class="regime-name">Madrid &amp; Hague Systems</div>
+              <div class="regime-desc">International trademark and design registration for export-market AYUSH brands</div>
+            </div>
+          </div>
+          <div class="regime-item">
+            <div class="regime-dot s"></div>
+            <div>
+              <div class="regime-name">Budapest Treaty</div>
+              <div class="regime-desc">International deposit of micro-organisms for patent purposes (Ayurvedic probiotics, fermented formulations)</div>
+            </div>
+          </div>
+          <div class="regime-item">
+            <div class="regime-dot g"></div>
+            <div>
+              <div class="regime-name">Export Market Regimes</div>
+              <div class="regime-desc">US FDA, EU EMA, WHO GACP, key herbal-product market-access requirements</div>
+            </div>
+          </div>
+          <div class="regime-item" style="border-bottom:none">
+            <div class="regime-dot y"></div>
+            <div>
+              <div class="regime-name">WIPO TKDL Interface</div>
+              <div class="regime-desc">Prior-art search in 34M+ traditional knowledge records across 5 classical languages</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Formulation Classification Demo ───────────────────────────── -->
+<section id="classify">
+  <div class="container">
+    <div class="classify-grid">
+      <div>
+        <div class="section-tag saffron">🌿 Formulation Classifier</div>
+        <h2 class="section-title">Know Your Product's IP Posture</h2>
+        <p class="section-sub">IP-SAKTI asks the minimum clarifying questions to determine your product's regulatory category — each with a very different IP and ABS posture.</p>
+        <div class="classify-cards" style="margin-top:36px">
+
+          <div class="classify-card active" data-category="classical">
+            <div class="classify-card-icon">📜</div>
+            <div class="classify-card-text">
+              <h4>Classical / Generic Medicine</h4>
+              <p>Formulation and method drawn from a First-Schedule authoritative text (e.g., Charaka Samhita). Largely TK — faces §3(p) bar, defended through TKDL.</p>
+            </div>
+            <span class="classify-card-badge badge-sec3p">§3(p) Bar</span>
+          </div>
+
+          <div class="classify-card" data-category="proprietary">
+            <div class="classify-card-icon">🔬</div>
+            <div class="classify-card-text">
+              <h4>Patent / Proprietary Medicine</h4>
+              <p>New, undisclosed formula or manufacturing process. Novel combinations may be patentable if they cross the inventive-step threshold.</p>
+            </div>
+            <span class="classify-card-badge badge-patent">Patentable</span>
+          </div>
+
+          <div class="classify-card" data-category="new_drug">
+            <div class="classify-card-icon">🧪</div>
+            <div class="classify-card-text">
+              <h4>New / Non-Classical Drug</h4>
+              <p>Not found in authoritative texts; requires proof of safety and effectiveness via clinical evidence. Genuine patent potential with data exclusivity.</p>
+            </div>
+            <span class="classify-card-badge badge-patent">High IP Value</span>
+          </div>
+
+          <div class="classify-card" data-category="phytopharmaceutical">
+            <div class="classify-card-icon">🌱</div>
+            <div class="classify-card-text">
+              <h4>Phytopharmaceutical</h4>
+              <p>Standardised plant-derived formulation meeting Schedule Y-A requirements. Sits between drug and nutraceutical; GI may apply.</p>
+            </div>
+            <span class="classify-card-badge badge-gi">GI Eligible</span>
+          </div>
+
+          <div class="classify-card" data-category="ayurveda_aahar">
+            <div class="classify-card-icon">🥗</div>
+            <div class="classify-card-text">
+              <h4>Ayurveda-Aahar / Nutraceutical</h4>
+              <p>FSSAI-regulated health/dietary product. Lower drug burden; trademark and trade-dress protection key.</p>
+            </div>
+            <span class="classify-card-badge badge-tkdl">FSSAI</span>
+          </div>
+
+          <div class="classify-card" data-category="cosmetic">
+            <div class="classify-card-icon">✨</div>
+            <div class="classify-card-text">
+              <h4>Cosmetic</h4>
+              <p>Governed by Drugs &amp; Cosmetics Act Schedule S. Design and trademark protection central; efficacy claims regulated by ASCI.</p>
+            </div>
+            <span class="classify-card-badge badge-gi">Design IP</span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Interactive Demo Panel -->
+      <div class="demo-panel">
+        <div class="demo-topbar">
+          <div class="dot-red"></div>
+          <div class="dot-yellow"></div>
+          <div class="dot-green"></div>
+          <span style="font-size: 13px; color: rgba(255,255,255,.4); margin-left: 8px;">ip-sakti · assistant</span>
+          <select id="chatLangSelect" style="background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:6px;font-size:11px;padding:3px 6px;margin-left:8px;outline:none;cursor:pointer;">
+            <option value="en" selected style="background:#1A1A2E;">🌐 English (en)</option>
+            <option value="hi" style="background:#1A1A2E;">🇮🇳 हिन्दी (hi)</option>
+            <option value="sa" style="background:#1A1A2E;">📜 संस्कृतम् (sa)</option>
+            <option value="mr" style="background:#1A1A2E;">🇮🇳 मराठी (mr)</option>
+            <option value="ta" style="background:#1A1A2E;">🇮🇳 தமிழ் (ta)</option>
+          </select>
+          <span id="backendStatus" style="font-size:11px;color:#28C840;background:rgba(40,200,64,.15);border:1px solid rgba(40,200,64,.3);padding:2px 10px;border-radius:99px;margin-left:auto;font-weight:600;">● http://127.0.0.1:8000</span>
+        </div>
+        <div class="demo-scroll" id="demoChat">
+
+          <div class="dm-bot">
+            <div class="dm-label">IP-SAKTI Sahayak</div>
+            <div class="dm-text">Namaste! 🙏 I can help you with IP &amp; regulatory guidance for your Ayurvedic product. Which jurisdiction are you asking about?</div>
+            <div style="display:flex;gap:6px;margin-top:10px">
+              <div class="chat-jt-btn active" data-jurisdiction="india" style="background:rgba(232,113,26,.3);color:#FFB47A;font-size:11px;font-weight:700;padding:5px 12px;border-radius:8px;cursor:pointer;border:1px solid rgba(232,113,26,.5);">🇮🇳 India</div>
+              <div class="chat-jt-btn" data-jurisdiction="international" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);font-size:11px;font-weight:700;padding:5px 12px;border-radius:8px;cursor:pointer;border:1px solid rgba(255,255,255,.15);">🌐 International</div>
+            </div>
+          </div>
+
+          <div class="dm-user">
+            <div class="dm-label">You</div>
+            <div class="dm-text">I want to protect my Ashwagandha extract — I have a novel extraction process that increases bioavailability by 40%.</div>
+          </div>
+
+          <div class="dm-bot">
+            <div class="dm-label">IP-SAKTI Sahayak</div>
+            <div class="dm-text">
+              Excellent — this sounds like it may be patentable. Let me classify it first.<br><br>
+              ✅ <strong>Category:</strong> Proprietary / New Drug (novel process)<br>
+              ✅ <strong>IP Route:</strong> Process patent under §5 of the Patents Act<br>
+              ⚠️ <strong>ABS Check:</strong> Ashwagandha (Withania somnifera) is a notified biological resource — you'll need NBA/IRCC clearance before commercialisation.<br><br>
+              Your novel extraction process likely crosses the inventive-step threshold under §2(1)(ja). The plant itself is not patentable, but the process is.
+            </div>
+            <div class="dm-cite">
+              <span class="dm-cite-pill">📜 Patents Act §2(1)(ja)</span>
+              <span class="dm-cite-pill">📜 Patents Act §5</span>
+              <span class="dm-cite-pill">🌿 BDA §3(i) + 2024 Rules</span>
+              <span class="dm-cite-pill">📋 NBA Form I</span>
+            </div>
+            <div class="dm-conf">
+              <span>Confidence:</span>
+              <div class="conf-bar"><div class="conf-fill" style="width:88%"></div></div>
+              <span>88%</span>
+            </div>
+          </div>
+
+          <div class="dm-user">
+            <div class="dm-label">You</div>
+            <div class="dm-text">What about international protection? I want to export to Europe.</div>
+          </div>
+
+          <div class="dm-bot">
+            <div class="dm-label">IP-SAKTI Sahayak</div>
+            <div class="dm-text">
+              Switching to 🌐 International layer:<br><br>
+              🔵 <strong>PCT Route:</strong> File via PCT within 12 months of Indian priority date to protect in 150+ countries including EU member states.<br>
+              🟡 <strong>WIPO GRATK 2024:</strong> Your application must now disclose origin of Withania somnifera — mandatory in all WIPO member state filings from 2025.<br>
+              🟢 <strong>EU Herbal Market:</strong> Obtain THMPD (Traditional Herbal Medicinal Product Directive) registration in EU — simplified clinical evidence pathway.
+            </div>
+            <div class="dm-cite">
+              <span class="dm-cite-pill">🌐 PCT Art. 11</span>
+              <span class="dm-cite-pill">🌐 WIPO GRATK Treaty 2024</span>
+              <span class="dm-cite-pill">🌐 EU Dir. 2004/24/EC</span>
+            </div>
+            <div class="dm-conf">
+              <span>Confidence:</span>
+              <div class="conf-bar"><div class="conf-fill" style="width:82%"></div></div>
+              <span>82%</span>
+            </div>
+          </div>
+
+        </div>
+        <div id="activeContextBar" style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:14px;margin-bottom:8px;padding:6px 12px;background:rgba(255,255,255,.05);border-radius:8px;font-size:11px;color:rgba(255,255,255,.7);">
+          <span>Regime: <strong id="activeRegimeLabel" style="color:#FFB47A">🇮🇳 India</strong></span>
+          <span>Category: <strong id="activeCategoryLabel" style="color:#27AE70">Classical Medicine</strong></span>
+          <span>Lang: <strong id="activeLangLabel" style="color:#A5B4FC">EN</strong></span>
+        </div>
+        <div class="demo-input">
+          <input type="text" placeholder="Ask about your Ayurvedic IP..." id="demoInput" />
+          <button class="demo-send" onclick="addUserMessage()">➤</button>
+        </div>
+        <div class="disclaimer" style="font-size:10px;color:rgba(255,255,255,.3);margin-top:10px;text-align:center">
+          ℹ️ IP-SAKTI provides information, not legal advice. Always consult a qualified IP attorney for legal decisions.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── Tech Stack ─────────────────────────────────────────────────── -->
+<section id="tech">
+  <div class="container">
+    <div class="tech-header">
+      <div class="section-tag">🛠️ Technology</div>
+      <h2 class="section-title">Built for Scale, Security &amp; Accuracy</h2>
+      <p class="section-sub" style="margin:14px auto 0">A staged build architecture — citation-grounded retrieval MVP first, then the knowledge graph and agentic layers.</p>
+    </div>
+    <div class="tech-layers">
+
+      <div class="tech-layer">
+        <div class="layer-header">
+          <div class="layer-icon">🧠</div>
+          <div class="layer-title">AI / LLM Layer</div>
+          <div class="layer-badge">Core Engine</div>
+        </div>
+        <div class="layer-body">
+          <div class="tech-chip"><div class="tech-dot tc-b"></div>Gemini Pro / GPT-4o</div>
+          <div class="tech-chip"><div class="tech-dot tc-s"></div>LangChain / LlamaIndex</div>
+          <div class="tech-chip"><div class="tech-dot tc-p"></div>RAG Pipeline</div>
+          <div class="tech-chip"><div class="tech-dot tc-g"></div>Agentic Orchestration</div>
+          <div class="tech-chip"><div class="tech-dot tc-y"></div>Knowledge Graph (Neo4j)</div>
+          <div class="tech-chip"><div class="tech-dot tc-b"></div>Confidence Scoring</div>
+        </div>
+      </div>
+
+      <div class="tech-layer">
+        <div class="layer-header">
+          <div class="layer-icon">📚</div>
+          <div class="layer-title">Knowledge Corpus</div>
+          <div class="layer-badge">Data Layer</div>
+        </div>
+        <div class="layer-body">
+          <div class="tech-chip"><div class="tech-dot tc-s"></div>Statutes &amp; Rules (PDF/XML)</div>
+          <div class="tech-chip"><div class="tech-dot tc-g"></div>Treaty Texts (WIPO / TRIPS)</div>
+          <div class="tech-chip"><div class="tech-dot tc-b"></div>TKDL Records</div>
+          <div class="tech-chip"><div class="tech-dot tc-p"></div>Case Law Database</div>
+          <div class="tech-chip"><div class="tech-dot tc-y"></div>Pharmacopoeial Standards (API)</div>
+          <div class="tech-chip"><div class="tech-dot tc-r"></div>Registry Records (IPO / GI)</div>
+          <div class="tech-chip"><div class="tech-dot tc-s"></div>Version-Tracked Corpus</div>
+        </div>
+      </div>
+
+      <div class="tech-layer">
+        <div class="layer-header">
+          <div class="layer-icon">🌐</div>
+          <div class="layer-title">Multilingual Infrastructure</div>
+          <div class="layer-badge">Accessibility</div>
+        </div>
+        <div class="layer-body">
+          <div class="tech-chip"><div class="tech-dot tc-s"></div>Bhashini API (MeitY)</div>
+          <div class="tech-chip"><div class="tech-dot tc-g"></div>IndicTrans2</div>
+          <div class="tech-chip"><div class="tech-dot tc-b"></div>Whisper ASR (Voice Input)</div>
+          <div class="tech-chip"><div class="tech-dot tc-p"></div>TTS (22 Indian Languages)</div>
+          <div class="tech-chip"><div class="tech-dot tc-y"></div>Sanskrit NLP Pipeline</div>
+        </div>
+      </div>
+
+      <div class="tech-layer">
+        <div class="layer-header">
+          <div class="layer-icon">🏗️</div>
+          <div class="layer-title">Infrastructure &amp; Security</div>
+          <div class="layer-badge">Platform</div>
+        </div>
+        <div class="layer-body">
+          <div class="tech-chip"><div class="tech-dot tc-b"></div>NIC Cloud / MeghRaj</div>
+          <div class="tech-chip"><div class="tech-dot tc-s"></div>FastAPI Backend</div>
+          <div class="tech-chip"><div class="tech-dot tc-g"></div>React / Next.js Frontend</div>
+          <div class="tech-chip"><div class="tech-dot tc-p"></div>Pinecone / Weaviate Vector DB</div>
+          <div class="tech-chip"><div class="tech-dot tc-y"></div>DigiLocker Integration</div>
+          <div class="tech-chip"><div class="tech-dot tc-r"></div>DPDP-Compliant Audit Logs</div>
+          <div class="tech-chip"><div class="tech-dot tc-b"></div>Docker / Kubernetes</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── Roadmap ─────────────────────────────────────────────────────── -->
+<section id="roadmap">
+  <div class="container">
+    <div class="roadmap-header">
+      <div class="section-tag saffron">🗓️ Build Roadmap</div>
+      <h2 class="section-title">Staged Delivery Strategy</h2>
+      <p class="section-sub">Three phases — from a citation-grounded MVP to a full agentic multilingual platform.</p>
+    </div>
+    <div class="roadmap-grid">
+
+      <div class="roadmap-card">
+        <div class="roadmap-phase p1">Phase 1 · MVP</div>
+        <div class="roadmap-title">Citation-Grounded Retrieval</div>
+        <div class="roadmap-time">Months 1–4</div>
+        <div class="roadmap-items">
+          <div class="roadmap-item"><div class="roadmap-check">✅</div><p>Curated corpus ingestion (statutes, rules, treaties)</p></div>
+          <div class="roadmap-item"><div class="roadmap-check">✅</div><p>RAG pipeline with mandatory source citations</p></div>
+          <div class="roadmap-item"><div class="roadmap-check">✅</div><p>Jurisdiction toggle (India / International)</p></div>
+          <div class="roadmap-item"><div class="roadmap-check">✅</div><p>Formulation classification flow</p></div>
+          <div class="roadmap-item"><div class="roadmap-check">✅</div><p>Confidence scoring &amp; safe abstention</p></div>
+          <div class="roadmap-item"><div class="roadmap-check">✅</div><p>Hindi + English multilingual support</p></div>
+        </div>
+      </div>
+
+      <div class="roadmap-card">
+        <div class="roadmap-phase p2">Phase 2 · Enhanced</div>
+        <div class="roadmap-title">Knowledge Graph &amp; Agentic</div>
+        <div class="roadmap-time">Months 5–8</div>
+        <div class="roadmap-items">
+          <div class="roadmap-item"><div class="roadmap-check">🔵</div><p>Relational knowledge graph (Neo4j)</p></div>
+          <div class="roadmap-item"><div class="roadmap-check">🔵</div><p>Multi-step agentic orchestration</p></div>
+          <div class="roadmap-item"><div class="roadmap-check">🔵</div><p>TKDL prior-art deep integration</p></div>
+          <div class="roadmap-item"><div class="roadmap-check">🔵</div><p>ABS compliance workflow helper</p></div>
+          <div class="roadmap-item"><div class="roadmap-check">🔵</div><p>10+ Indian language support via Bhashini</p></div>
+          <div class="roadmap-item"><div class="roadmap-check">🔵</div><p>Human escalation pathway</p></div>
+        </div>
+      </div>
+
+      <div class="roadmap-card">
+        <div class="roadmap-phase p3">Phase 3 · Full Platform</div>
+        <div class="roadmap-title">Multilingual Voice &amp; Connectors</div>
+        <div class="roadmap-time">Months 9–12</div>
+        <div class="roadmap-items">
+          <div class="roadmap-item"><div class="roadmap-check">⬜</div><p>22+ language voice input/output</p></div>
+          <div class="roadmap-item"><div class="roadmap-check">⬜</div><p>Paid database connectors (user-permissioned)</p></div>
+          <div class="roadmap-item"><div class="roadmap-check">⬜</div><p>DigiLocker &amp; IPO registry live integration</p></div>
+          <div class="roadmap-item"><div class="roadmap-check">⬜</div><p>Full DPDP audit compliance dashboard</p></div>
+          <div class="roadmap-item"><div class="roadmap-check">⬜</div><p>Export market regulatory connectors</p></div>
+          <div class="roadmap-item"><div class="roadmap-check">⬜</div><p>Corpus auto-update pipeline</p></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── Impact ──────────────────────────────────────────────────────── -->
+<section id="impact">
+  <div class="container">
+    <div class="impact-header">
+      <div class="section-tag">🌟 Impact</div>
+      <h2 class="section-title">Who Benefits from IP-SAKTI?</h2>
+      <p class="section-sub" style="margin:14px auto 0">Serving the entire AYUSH ecosystem — from grassroots practitioners to global MSME exporters.</p>
+    </div>
+    <div class="impact-cards">
+      <div class="impact-card">
+        <div class="impact-icon">👩‍⚕️</div>
+        <div class="impact-value">5M+</div>
+        <div class="impact-label">AYUSH Practitioners</div>
+        <div class="impact-sub">Vaidyas, physicians &amp; traditional healers across India</div>
+      </div>
+      <div class="impact-card">
+        <div class="impact-icon">🏭</div>
+        <div class="impact-value">9,000+</div>
+        <div class="impact-label">AYUSH MSMEs</div>
+        <div class="impact-sub">Licensed manufacturers &amp; startups needing IP guidance</div>
+      </div>
+      <div class="impact-card">
+        <div class="impact-icon">🌾</div>
+        <div class="impact-value">2M+</div>
+        <div class="impact-label">Cultivators</div>
+        <div class="impact-sub">Medicinal plant farmers needing GI &amp; PVP rights</div>
+      </div>
+      <div class="impact-card">
+        <div class="impact-icon">🔬</div>
+        <div class="impact-value">500+</div>
+        <div class="impact-label">AYUSH Researchers</div>
+        <div class="impact-sub">Academic &amp; CSIR researchers seeking patent intelligence</div>
+      </div>
+      <div class="impact-card">
+        <div class="impact-icon">🌍</div>
+        <div class="impact-value">₹1.2L Cr</div>
+        <div class="impact-label">AYUSH Market Size</div>
+        <div class="impact-sub">India's AYUSH industry targeted at \$24B by 2025</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Team ────────────────────────────────────────────────────────── -->
+<section id="team">
+  <div class="container">
+    <div class="team-header">
+      <div class="section-tag gold">👥 Team</div>
+      <h2 class="section-title">The Minds Behind IP-SAKTI</h2>
+      <p class="section-sub" style="margin:14px auto 0">A multidisciplinary team combining AI/ML expertise, legal domain knowledge and Ayurveda experience.</p>
+    </div>
+    <div class="team-cards">
+      <!-- Team Leader -->
+      <div class="team-card">
+        <div class="team-avatar av-s">P</div>
+        <div class="team-name">Prajwal Aher</div>
+        <div class="team-role">Team Leader</div>
+      </div>
+      <!-- Members -->
+      <div class="team-card">
+        <div class="team-avatar av-g">K</div>
+        <div class="team-name">Kshitij Shivpurkar</div>
+        <div class="team-role">Team Member</div>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar av-b">T</div>
+        <div class="team-name">Tejas Jagdale</div>
+        <div class="team-role">Team Member</div>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar av-p">S</div>
+        <div class="team-name">Shrutika Ughade</div>
+        <div class="team-role">Team Member</div>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar av-t">K</div>
+        <div class="team-name">Kalash Yadav</div>
+        <div class="team-role">Team Member</div>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar av-g">D</div>
+        <div class="team-name">Dipali Tawde</div>
+        <div class="team-role">Team Member</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ─────────────────────────────────────────────────────── -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <div class="footer-logo-icon">⚖️</div>
+          <div class="footer-logo-name">IP-SAKTI Sahayak</div>
+        </div>
+        <p class="footer-desc">
+          Multilingual, RAG-based AI assistant for Intellectual Property and regulatory guidance in Ayurveda. SIH26045 · Ministry of Ayush · All India Institute of Ayurveda.
+        </p>
+        <div class="disclaimer" style="margin-top:16px">
+          ⚠️ IP-SAKTI Sahayak provides information and not legal advice. All answers must be verified with a qualified legal professional before any legal or commercial decision.
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Features</h4>
+        <ul>
+          <li><a href="#features">RAG-Powered Answers</a></li>
+          <li><a href="#jurisdiction">Jurisdiction Toggle</a></li>
+          <li><a href="#classify">Formulation Classifier</a></li>
+          <li><a href="#features">ABS Compliance</a></li>
+          <li><a href="#features">TKDL Pointer</a></li>
+          <li><a href="#features">Multilingual</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal Coverage</h4>
+        <ul>
+          <li><a href="#jurisdiction">Patents Act 2024</a></li>
+          <li><a href="#jurisdiction">BDA 2023</a></li>
+          <li><a href="#jurisdiction">GI Act</a></li>
+          <li><a href="#jurisdiction">Nagoya Protocol</a></li>
+          <li><a href="#jurisdiction">WIPO GRATK 2024</a></li>
+          <li><a href="#jurisdiction">TRIPS</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>SIH 2026</h4>
+        <ul>
+          <li><a href="#sih">Challenge #SIH26045</a></li>
+          <li><a href="#team">Our Team</a></li>
+          <li><a href="#roadmap">Roadmap</a></li>
+          <li><a href="#tech">Tech Stack</a></li>
+          <li><a href="#impact">Impact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 IP-SAKTI Sahayak · Smart India Hackathon SIH26045 · Ministry of Ayush · All India Institute of Ayurveda</p>
+      <p style="color:rgba(255,255,255,.3)">MedTech / BioTech / HealthTech · Challenge #45 of 236</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ── Scripts ────────────────────────────────────────────────────── -->
+<script>
+  // Navbar scroll effect
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 60) navbar.classList.add('scrolled');
+    else navbar.classList.remove('scrolled');
+
+    // Progress bar
+    const doc = document.documentElement;
+    const scrollTop = window.scrollY || doc.scrollTop;
+    const scrollHeight = doc.scrollHeight - doc.clientHeight;
+    const pct = (scrollTop / scrollHeight) * 100;
+    document.getElementById('progress-bar').style.width = pct + '%';
+  });
+
+  // Mobile menu
+  function toggleMenu() {
+    const links = document.querySelector('.nav-links');
+    links.style.display = links.style.display === 'flex' ? 'none' : 'flex';
+    links.style.flexDirection = 'column';
+    links.style.position = 'absolute';
+    links.style.top = '80px';
+    links.style.left = '0';
+    links.style.right = '0';
+    links.style.background = 'rgba(13,31,60,.97)';
+    links.style.padding = '20px 24px';
+    links.style.gap = '20px';
+  }
+
+  // ── Backend Configuration & State ──────────────────────────────
+  const BACKEND_API_URL = 'https://ip-sakti-backend-9gcd.onrender.com';
+  let activeJurisdiction = 'india';
+  let activeCategoryHint = 'classical';
+  let activeCategoryName = 'Classical Medicine';
+  let activeLanguage = 'en';
+
+  // Synchronize Jurisdiction Toggles (both hero & chat widget)
+  function setJurisdiction(jur) {
+    activeJurisdiction = jur;
+    const isIndia = jur === 'india';
+    
+    // Hero toggles
+    document.querySelectorAll('.jt-btn').forEach(btn => {
+      const btnIsIndia = !btn.textContent.includes('International');
+      btn.classList.toggle('active', btnIsIndia === isIndia);
+    });
+
+    // Chat welcome buttons
+    document.querySelectorAll('.chat-jt-btn').forEach(btn => {
+      const btnIsIndia = btn.getAttribute('data-jurisdiction') === 'india';
+      if (btnIsIndia === isIndia) {
+        btn.style.background = 'rgba(232,113,26,.3)';
+        btn.style.color = '#FFB47A';
+        btn.style.borderColor = 'rgba(232,113,26,.5)';
+      } else {
+        btn.style.background = 'rgba(255,255,255,.1)';
+        btn.style.color = 'rgba(255,255,255,.6)';
+        btn.style.borderColor = 'rgba(255,255,255,.15)';
+      }
+    });
+
+    // Update active context bar
+    const regLabel = document.getElementById('activeRegimeLabel');
+    if (regLabel) regLabel.innerHTML = isIndia ? '🇮🇳 India' : '🌐 International';
+  }
+
+  // Hero jurisdiction buttons
+  document.querySelectorAll('.jt-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      setJurisdiction(btn.textContent.includes('International') ? 'international' : 'india');
+    });
+  });
+
+  // Chat widget jurisdiction buttons
+  document.querySelectorAll('.chat-jt-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const jur = btn.getAttribute('data-jurisdiction') || 'india';
+      setJurisdiction(jur);
+    });
+  });
+
+  // Category selection cards
+  document.querySelectorAll('.classify-card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.classify-card').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+      activeCategoryHint = card.getAttribute('data-category') || 'classical';
+      
+      const h4 = card.querySelector('h4');
+      activeCategoryName = h4 ? h4.textContent.trim() : activeCategoryHint;
+      
+      const catLabel = document.getElementById('activeCategoryLabel');
+      if (catLabel) catLabel.textContent = activeCategoryName;
+    });
+  });
+
+  // Language selector
+  const langSelect = document.getElementById('chatLangSelect');
+  if (langSelect) {
+    langSelect.addEventListener('change', (e) => {
+      activeLanguage = e.target.value;
+      const langLabel = document.getElementById('activeLangLabel');
+      if (langLabel) langLabel.textContent = activeLanguage.toUpperCase();
+    });
+  }
+
+  // Check backend health & telemetry on load
+  async function checkBackendStatus() {
+    const badge = document.getElementById('backendStatus');
+    try {
+      const res = await fetch(`${BACKEND_API_URL}/api/health`, { method: 'GET' });
+      if (res.ok) {
+        const data = await res.json();
+        const totalChunks = (data.vector_db?.india_chunks || 0) + (data.vector_db?.international_chunks || 0);
+        badge.innerHTML = `● Online (${totalChunks} chunks)`;
+        badge.style.color = '#28C840';
+        badge.style.background = 'rgba(40,200,64,.15)';
+        badge.style.borderColor = 'rgba(40,200,64,.3)';
+      } else {
+        throw new Error('Health check status ' + res.status);
+      }
+    } catch (e) {
+      if (badge) {
+        badge.innerHTML = '● Backend Offline (Port 8000)';
+        badge.style.color = '#FF5F57';
+        badge.style.background = 'rgba(255,95,87,.15)';
+        badge.style.borderColor = 'rgba(255,95,87,.3)';
+      }
+    }
+  }
+  checkBackendStatus();
+
+  // Helper: Format Markdown to HTML
+  function formatMarkdown(text) {
+    if (!text) return '';
+    let out = escHtml(text);
+    // Headings
+    out = out.replace(/### (.*?)(<br>|\n|$)/g, '<div style="font-weight:700;font-size:14px;color:#fff;margin:8px 0 4px;">$1</div>');
+    // Bold
+    out = out.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    // Bullet items
+    out = out.replace(/(?:^|\n)- (.*?)(?=\n|$)/g, '<div style="padding-left:14px;margin:2px 0;">• $1</div>');
+    // Numbered lists
+    out = out.replace(/(?:^|\n)(\d+\.) (.*?)(?=\n|$)/g, '<div style="padding-left:14px;margin:2px 0;">$1 $2</div>');
+    // Line breaks
+    out = out.replace(/\n\n/g, '<br><br>').replace(/\n/g, '<br>');
+    return out;
+  }
+
+  // Real RAG Assistant Query
+  async function addUserMessage() {
+    const input = document.getElementById('demoInput');
+    const chat  = document.getElementById('demoChat');
+    const val   = input.value.trim();
+    if (!val) return;
+
+    // Render user query
+    const userDiv = document.createElement('div');
+    userDiv.className = 'dm-user';
+    const regimeTag = activeJurisdiction === 'india' ? '🇮🇳 India' : '🌐 International';
+    userDiv.innerHTML = `<div class="dm-label">You (${regimeTag} • ${escHtml(activeCategoryName)} • ${activeLanguage.toUpperCase()})</div><div class="dm-text">${escHtml(val)}</div>`;
+    chat.appendChild(userDiv);
+    input.value = '';
+    chat.scrollTop = chat.scrollHeight;
+
+    // Loading indicator
+    const typing = document.createElement('div');
+    typing.className = 'dm-bot';
+    typing.innerHTML = `
+      <div class="dm-label">IP-SAKTI Sahayak</div>
+      <div class="dm-text" style="opacity:.65">
+        Searching ${activeJurisdiction.toUpperCase()} statutory corpus (${escHtml(activeCategoryName)})... ⏳
+      </div>
+    `;
+    chat.appendChild(typing);
+    chat.scrollTop = chat.scrollHeight;
+
+    try {
+      const response = await fetch(`${BACKEND_API_URL}/api/query`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          query: val,
+          jurisdiction: activeJurisdiction,
+          language: activeLanguage,
+          category_hint: activeCategoryHint
+        })
+      });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.detail || `Server responded with status ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // Format legal answer text
+      const formattedAnswer = formatMarkdown(data.answer);
+
+      // Render citations
+      let citationsHtml = '';
+      if (data.citations && data.citations.length > 0) {
+        citationsHtml = data.citations.map(c => `
+          <a href="${c.official_link || '#'}" target="_blank" rel="noopener noreferrer" class="dm-cite-pill" title="${escHtml(c.summary)}" style="cursor:pointer;text-decoration:none;">
+            📜 ${escHtml(c.section_or_article)}: ${escHtml(c.title)}
+          </a>
+        `).join(' ');
+      }
+
+      // TKDL status badge
+      if (data.tkdl_status) {
+        const isTkIndexed = data.tkdl_status.includes('Referenced') || data.tkdl_status.includes('High');
+        const tkColor = isTkIndexed ? '#FFB47A' : '#6EE7B7';
+        const tkBg = isTkIndexed ? 'rgba(232,113,26,.2)' : 'rgba(27,122,78,.2)';
+        citationsHtml += ` <span class="dm-cite-pill" style="color:${tkColor};background:${tkBg};border:1px solid ${tkColor}40;">📚 TKDL: ${escHtml(data.tkdl_status)}</span>`;
+      }
+
+      // ABS guidance box if present
+      let absHtml = '';
+      if (data.abs_guidance) {
+        absHtml = `
+          <div style="margin-top:10px;padding:8px 12px;background:rgba(27,122,78,.2);border-left:3px solid #27AE70;border-radius:4px;font-size:12px;color:rgba(255,255,255,.9);">
+            🌿 <strong>ABS Guidance:</strong> ${escHtml(data.abs_guidance)}
+          </div>
+        `;
+      }
+
+      // Confidence score styling
+      const rawConf = data.confidence_score !== undefined ? data.confidence_score : 0.75;
+      const confPct = Math.round(rawConf * 100);
+      let confColor = '#28C840';
+      if (confPct < 45) confColor = '#FF5F57';
+      else if (confPct < 65) confColor = '#FEBC2E';
+
+      // Safe abstention & escalation warning
+      let escalationHtml = '';
+      if (data.needs_human_escalation) {
+        escalationHtml = `
+          <div style="margin-top:10px;padding:10px 12px;background:rgba(239,68,68,.18);border:1px solid rgba(239,68,68,.35);border-radius:8px;font-size:12px;color:#FCA5A5;">
+            ⚠️ <strong>Safe Abstention Triggered:</strong><br>
+            ${escHtml(data.escalation_reason || 'Statutory confidence is below certainty threshold. This query involves nuanced legal interpretation.')}<br>
+            <a href="#team" style="display:inline-block;margin-top:6px;padding:4px 10px;background:#EF4444;color:#fff;border-radius:6px;font-weight:600;text-decoration:none;font-size:11px;">
+              Escalate to AYUSH IP Cell / Facilitator →
+            </a>
+          </div>
+        `;
+      }
+
+      // Statutory disclaimer
+      const disclaimerHtml = data.disclaimer ? `
+        <div style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08);font-size:10px;color:rgba(255,255,255,.4);font-style:italic;">
+          ${escHtml(data.disclaimer)}
+        </div>
+      ` : '';
+
+      typing.innerHTML = `
+        <div class="dm-label" style="display:flex;align-items:center;justify-content:space-between;">
+          <span>IP-SAKTI Sahayak (${data.jurisdiction ? data.jurisdiction.toUpperCase() : 'INDIA'})</span>
+          <span style="font-size:10px;color:rgba(255,255,255,.4);text-transform:none;">${escHtml(data.formulation_category || activeCategoryName)}</span>
+        </div>
+        <div class="dm-text">${formattedAnswer}</div>
+        ${absHtml}
+        ${escalationHtml}
+        <div class="dm-cite">${citationsHtml}</div>
+        <div class="dm-conf">
+          <span>Confidence:</span>
+          <div class="conf-bar"><div class="conf-fill" style="width:${confPct}%;background:${confColor};"></div></div>
+          <span style="color:${confColor};font-weight:700;">${confPct}%</span>
+        </div>
+        ${disclaimerHtml}
+      `;
+    } catch (err) {
+      // Graceful error display inside chat bubble
+      typing.innerHTML = `
+        <div class="dm-label" style="color:#FF5F57;">IP-SAKTI Sahayak (Connection Error)</div>
+        <div class="dm-text" style="color:#FCA5A5;font-size:13px;line-height:1.6;">
+          ⚠️ <strong>Cannot reach local FastAPI backend</strong> at <code style="background:rgba(255,255,255,.1);padding:1px 5px;border-radius:4px;color:#fff;">http://127.0.0.1:8000/api/query</code>.<br><br>
+          Please make sure the backend server is running in a terminal:<br>
+          <pre style="background:rgba(0,0,0,.4);padding:8px 12px;border-radius:6px;margin:8px 0;color:#6EE7B7;font-family:monospace;font-size:11px;overflow-x:auto;">cd C:\\Users\\Lenovo\\.gemini\\antigravity\\scratch\\ip-sakti-backend\n.\\venv\\Scripts\\activate\nuvicorn app.main:app --host 127.0.0.1 --port 8000</pre>
+          <span style="font-size:11px;color:rgba(255,255,255,.6);">Details: ${escHtml(err.message)}</span>
+        </div>
+      `;
+    }
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  document.getElementById('demoInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addUserMessage();
+  });
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // Intersection Observer for animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.feature-card, .step-card, .roadmap-card, .impact-card, .team-card, .classify-card').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'opacity .5s ease, transform .5s ease';
+    observer.observe(el);
+  });
+</script>
+
+</body>
+</html>
